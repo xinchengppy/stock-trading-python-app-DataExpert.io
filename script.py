@@ -8,7 +8,6 @@ load_dotenv()
 
 POLYGON_API_KEY = os.getenv("POLYGON_API_KEY")
 LIMIT = 1000
-DS = '2025-09-30'
 
 def run_stock_job():
     DS = datetime.now().strftime('%Y-%m-%d')
@@ -42,7 +41,7 @@ def run_stock_job():
     'composite_figi': 'BBG00FZ4KFH5', 
     'share_class_figi': 'BBG00FZ4KG74', 
     'last_updated_utc': '2025-09-29T06:04:58.488325301Z',
-    'ds': '2025-09-30'
+    'ds': DS
     }
 
     fieldnames = list(example_ticker.keys())
@@ -58,8 +57,6 @@ def load_to_snowflake(rows, fieldnames):
         'password': os.getenv('SNOWFLAKE_PASSWORD'),
         'account': os.getenv('SNOWFLAKE_ACCOUNT'),
         'warehouse': os.getenv('SNOWFLAKE_WAREHOUSE'),
-        'database': os.getenv('SNOWFLAKE_DATABASE'),
-        'schema': os.getenv('SNOWFLAKE_SCHEMA'),
         'role': os.getenv('SNOWFLAKE_ROLE'),
         'session_parameters': {"CLIENT_TELEMETRY_ENABLED": False}
     }
@@ -71,10 +68,20 @@ def load_to_snowflake(rows, fieldnames):
     for r in required:
         if r not in connect_kwargs:
             raise ValueError(f"Missing required connection parameter: {r}")
+        
+    # Read DB and schema from env
+    database = os.getenv('SNOWFLAKE_DATABASE', 'STOCK_DB')
+    schema = os.getenv('SNOWFLAKE_SCHEMA', 'PUBLIC')
 
     conn = snowflake.connector.connect(**connect_kwargs)
     try:
         with conn.cursor() as cs:
+            #create DB and schema if missing
+            cs.execute(f"CREATE DATABASE IF NOT EXISTS {database}")
+            cs.execute(f"CREATE SCHEMA IF NOT EXISTS {database}.{schema}")
+            cs.execute(f"USE DATABASE {database}")
+            cs.execute(f"USE SCHEMA {schema}")
+
             table_name = os.getenv('SNOWFLAKE_TABLE', 'STOCK_TICKERS')
 
             type_overrides = {
@@ -97,7 +104,8 @@ def load_to_snowflake(rows, fieldnames):
             columns_sql = ', '.join(
                 [f'"{col.upper()}" {type_overrides.get(col, "VARCHAR")}' for col in fieldnames]
             )
-            cs.execute(f'CREATE TABLE IF NOT EXISTS {table_name} ( {columns_sql} )')
+            qualified_table = f"{database}.{schema}.{table_name}"
+            cs.execute(f'CREATE TABLE IF NOT EXISTS {qualified_table} ( {columns_sql} )')
 
             # INSERT
             column_list = ', '.join([f'"{c.upper()}"' for c in fieldnames])
