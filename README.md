@@ -1,7 +1,7 @@
 # Stock Trading Python App — Snowflake Data Load Demo
 
 This project demonstrates how to extract stock ticker data, process it in Python, and load it into a Snowflake data warehouse using the official **Snowflake Python Connector**.  
-It was created as part of the DataExpert.io Data Engineering bootcamp.
+It was created as part of the [DataExpert.io](https://github.com/DataExpert-io-Community) [Data Engineering bootcamp](https://github.com/DataExpert-io/data-engineer-handbook).
 
 
 ## Project Structure
@@ -10,6 +10,7 @@ stock-trading-python-app-DataExpert.io/
 ├── script.py                # Main script: loads data into Snowflake
 ├── .env                     # Example environment variable file
 ├── requirements.txt         # Python dependencies
+├── logs/                    # Log files (auto-generated)
 └── README.md                # Documentation
 ```
 
@@ -47,6 +48,15 @@ The script will automatically:
 - Automatically create the database, schema, and table if they don’t exist
 - Insert all retrieved ticker records into the specified Snowflake table
 
+Every execution of the script automatically generates a timestamped log file inside the /logs folder:
+```
+logs/
+├── stock_job_2025-10-13_20-45-10.log
+├── stock_job_2025-10-13_22-15-32.log
+└── ...
+```
+
+
 ## Verify Data in snowflake
 Log in to your Snowflake web console and run:
 ```
@@ -62,7 +72,10 @@ and insert them with a new ds (date stamp = another day) into the same Snowflake
 
 
 
-
+***
 This project is for personal learning purposes.
+
+This project is guided by:
+[DataExpert.io](https://www.dataexpert.io/) and [Zach Wilson](https://www.linkedin.com/in/eczachly/)
 
 
