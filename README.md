@@ -1,4 +1,4 @@
-# Stock Trading Python App — Snowflake Data Load Demo
+# Stock Trading Python App — Snowflake Data Load
 
 This project demonstrates how to extract stock ticker data, process it in Python, and load it into a Snowflake data warehouse using the official **Snowflake Python Connector**.  
 It was created as part of the [DataExpert.io](https://github.com/DataExpert-io-Community) [Data Engineering bootcamp](https://github.com/DataExpert-io/data-engineer-handbook).
